@@ -349,6 +349,8 @@
         .meng-row { display: grid; gap: 8px; align-items: start; }   /* kolommen dynamisch per product */
         .meng-info { font-size: 13px; color: #535554; line-height: 1.4; margin-top: 8px; }   /* V4.3.0: per verpakking + voorstel */
         .meng-info:empty { display: none; }
+        .ruw-label { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600; color: #333; cursor: pointer; padding: 4px 2px; }
+        .ruw-label input { width: 22px; height: 22px; accent-color: #33B2D2; }
         .meng-label { font-size: 12px; color: #535554; font-weight: 600; margin-bottom: 3px; text-transform: capitalize; line-height: 1.2; }
 
         .footer {
@@ -416,6 +418,10 @@
             </div>
         </div>
 
+        <div class="calc-group" id="ruwGroup" style="display: none;">
+            <label class="ruw-label"><input type="checkbox" id="ruwOndergrond"> <span id="ruwTekst"></span></label>
+        </div>
+
         <div class="result-box">
             <div class="result-label" id="resultLabel"></div>
             <div class="result-empty" id="resultEmpty">--</div>
@@ -444,7 +450,7 @@
 
     <script>
         // === Vertalingen (per taal ingevuld door de generator) ===
-        var T = {"lang": "en", "locale": "en-GB", "title": "Aquafin Calculator", "clientPh": "Customer name or job address", "productLabel": "Product", "productPh": "Choose product", "layersLabel": "Number of layers", "layersPh": "Number of layers", "surfaceLabel": "Total surface area", "surfacePh": "Total surface (m²)", "resultLabel": "Consumption", "resetAria": "Reset", "mengTitle": "Mixing helper", "mengPoederPh": "Powder (kg)", "ratioWord": "ratio", "optWord": "optional", "takeWord": "To take along", "bagsWord": "bags", "setsWord": "sets", "layerSingular": "layer", "layerPlural": "layers", "colon": ":", "totalWord": "total", "powder": "powder", "liquid": "liquid", "colWater": "water", "colWaterMax": "water (max.)", "maxWord": "max.", "unitKg": "kg", "unitL": "L", "unitM2": "m²", "noteBoldTpl": "{naam} is a 2-component product.", "noteRestTpl": "Powder + liquid (dispersion): always mix in the weight ratio {ratio} (powder : liquid), also when using part of a set. Water is optional, {watermax}, for workability only.", "waterMaxTpl": "max. {amt} L per {setkg} kg set", "m30dOption": "Asocret M30 (sealing layer)", "dikteLabelD": "Sealing layer thickness", "dichtWord": "sealing layer", "unitCm": "cm", "m30dNote": "Asocret M30 - sealing layer in 1 pass, 1 cm (AQP standard), 1.5 cm or 2 cm. Consumption 1.4 kg/m² per mm (1 cm = 14 kg/m²). 1-component: water 4.5-5.25 L per 25 kg bag.", "m30Option": "Asocret M30 (finishing)", "dikteLabel": "Finishing layer thickness (mm)", "resultAfwerk": "Finishing layer consumption", "afwerkWord": "finishing", "m30Note": "Asocret M30 - for the finishing layer only, in 1 pass. Default 5 mm (TDS: 3-30 mm). Consumption 1.4 kg/m² per mm. 1-component: water 4.5-5.25 L per 25 kg bag.", "mengZakTpl": "Per {kg} kg bag: {w} L water.", "mengSetTpl": "Per {set} kg set: {p} kg powder + {v} L liquid (water max. {w} L).", "mengZakM30Tpl": "Per {kg} kg bag: {w1}-{w2} L water.", "mengVoorstelTpl": "Suggested per person per mix: {kg} kg powder (working time approx. {min} minutes).", "mengKelder1k": "In a cool basement 1K stays workable longer: up to half a bag (12.5 kg) per mix.", "plusNote": "Aquafin 1K‑PLUS - same consumption and water as Aquafin 1K (6.7 L per 25 kg bag). Working time only approx. 30 minutes: mix max. approx. 4 kg per person (+ 1.07 L water, approx. 2 m² per layer); by machine 1 bag per fill. Less in hot weather. Recoatable after approx. 90 minutes, max. 2 mm per layer. Do not re-temper stiffening mortar with water or fresh mortar.", "footer": "Consumption per AQP standard (waterproofing calculator V7) and Schomburg TDS. Indicative. Liquid (2K/RB400) in L at a dispersion density of ~1.0 kg/L."};
+        var T = {"lang": "en", "locale": "en-GB", "title": "Aquafin Calculator", "clientPh": "Customer name or job address", "productLabel": "Product", "productPh": "Choose product", "layersLabel": "Number of layers", "layersPh": "Number of layers", "surfaceLabel": "Total surface area", "surfacePh": "Total surface (m²)", "resultLabel": "Consumption", "resetAria": "Reset", "mengTitle": "Mixing helper", "mengPoederPh": "Powder (kg)", "ratioWord": "ratio", "optWord": "optional", "takeWord": "To take along", "bagsWord": "bags", "setsWord": "sets", "layerSingular": "layer", "layerPlural": "layers", "colon": ":", "totalWord": "total", "powder": "powder", "liquid": "liquid", "colWater": "water", "colWaterMax": "water (max.)", "maxWord": "max.", "unitKg": "kg", "unitL": "L", "unitM2": "m²", "noteBoldTpl": "{naam} is a 2-component product.", "noteRestTpl": "Powder + liquid (dispersion): always mix in the weight ratio {ratio} (powder : liquid), also when using part of a set. Water is optional, {watermax}, for workability only.", "waterMaxTpl": "max. {amt} L per {setkg} kg set", "m30dOption": "Asocret M30 (sealing layer)", "dikteLabelD": "Sealing layer thickness", "dichtWord": "sealing layer", "unitCm": "cm", "m30dNote": "Asocret M30 - sealing layer in 1 pass, 1 cm (AQP standard), 1.5 cm or 2 cm. Consumption 1.4 kg/m² per mm (1 cm = 14 kg/m²). 1-component: water 4.5-5.25 L per 25 kg bag.", "m30Option": "Asocret M30 (finishing)", "dikteLabel": "Finishing layer thickness (mm)", "resultAfwerk": "Finishing layer consumption", "afwerkWord": "finishing", "m30Note": "Asocret M30 - finishing layer in 1 pass. Default 5 mm (TDS: 3-30 mm). For the sealing layer: choose Asocret M30 (sealing layer). Consumption 1.4 kg/m² per mm. 1-component: water 4.5-5.25 L per 25 kg bag.", "mengZakTpl": "Per {kg} kg bag: {w} L water.", "mengSetTpl": "Per {set} kg set: {p} kg powder + {v} L liquid (water max. {w} L).", "mengZakM30Tpl": "Per {kg} kg bag: {w1}-{w2} L water.", "mengVoorstelTpl": "Suggested per person per mix: {kg} kg powder (working time approx. {min} minutes).", "mengKelder1k": "In a cool basement 1K stays workable longer: up to half a bag (12.5 kg) per mix.", "ruwLabel": "Rough or uneven substrate (+25 % consumption)", "bagSingular": "bag", "setSingular": "set", "bagsFew": "bags", "setsFew": "sets", "plusNote": "Aquafin 1K‑PLUS - same consumption and water as Aquafin 1K (6.7 L per 25 kg bag). Working time only approx. 30 minutes: mix max. approx. 4 kg per person (+ 1.07 L water, approx. 2 m² per layer); by machine 1 bag per fill. Less in hot weather. Recoatable after approx. 90 minutes, max. 2 mm per layer. Do not re-temper stiffening mortar with water or fresh mortar.", "footer": "Consumption per AQP standard (waterproofing calculator V7) and Schomburg TDS. Indicative. Liquid (2K/RB400) in L at a dispersion density of ~1.0 kg/L."};
 
         // Gezaghebbende verbruikswaarden (taalneutraal): AQP dichtingscalculator V7 + Schomburg TDS.
         var PRODUCTS = {
@@ -464,7 +470,7 @@
             '2k': {
                 naam: 'Aquafin 2K', perLaag: 1.75, tweeComp: true, ratioA: 2.5,
                 setKg: 35, poederPerSet: 25, vloeistofPerSet: 10, waterMaxPerSet: 0.5, mengDefaultKg: 5, verwerkMin: 60,
-                lagenOpties: [{ n: 1 }, { n: 2 }]
+                lagenOpties: [{ n: 2 }]   // V4.3.1: TDS min. 2 arbeidsgangen (1 laag geschrapt, Wim 09/11)
             },
             'rb400': {
                 naam: 'Aquafin RB400', perLaag: 2.40, tweeComp: true, ratioA: 1.5,
@@ -572,6 +578,7 @@
             document.getElementById('lagenWrap').style.display = afwerk ? 'none' : '';
             document.getElementById('dikteWrap').style.display = (afwerk && !vast) ? '' : 'none';
             document.getElementById('dikteSelWrap').style.display = vast ? '' : 'none';
+            document.getElementById('ruwGroup').style.display = (p && !afwerk) ? '' : 'none';   // V4.3.1: enkel Aquafin-coatings
             document.getElementById('gh-lagen').textContent = afwerk ? (p.dichting ? T.dikteLabelD : T.dikteLabel) : T.layersLabel;
             if (vast) {
                 var ds = document.getElementById('dikteSel');
@@ -598,6 +605,7 @@
         });
         lagenSelect.addEventListener('change', function() { styleSelect(this); calculate(); });
         document.getElementById('dikteSel').addEventListener('change', function() { calculate(); mengBuild(); });
+        document.getElementById('ruwOndergrond').addEventListener('change', function() { calculate(); });
         document.getElementById('dikteMm').addEventListener('input', function() {
             calculate(); updateUnitPosition(this); mengBuild();
         });
@@ -606,6 +614,7 @@
             document.getElementById('oppervlakte').value = '';
             document.getElementById('product').value = '';
             document.getElementById('dikteMm').value = '';
+            document.getElementById('ruwOndergrond').checked = false;
             productSelect.classList.add('placeholder-active');
             buildLagenForProduct();   // -> alleen placeholder zolang geen product gekozen
             applyProductMode();       // -> terug naar lagen-modus
@@ -726,7 +735,7 @@
             mengCells.forEach(function (c) {
                 if (c === src) return;
                 if (c.rangeMin !== undefined) {
-                    c.el.value = nf(base * c.rangeMin, 1) + '-' + nf(base * c.rangeMax, 1);   // TDS-range
+                    c.el.value = nf(base * c.rangeMin, 2) + '-' + nf(base * c.rangeMax, 2);   // TDS-range (V4.3.1: 2 decimalen)
                 } else {
                     c.el.value = nf(base * c.per, 2);   // locale-komma (bv. "11,20")
                 }
@@ -750,6 +759,7 @@
             document.getElementById('oppUnit').textContent = T.unitM2;
             document.getElementById('resultLabel').textContent = T.resultLabel;
             document.getElementById('gh-meng').textContent = T.mengTitle;
+            document.getElementById('ruwTekst').textContent = T.ruwLabel;
             document.getElementById('footer').textContent = T.footer;
         }
 
@@ -757,6 +767,14 @@
         buildLagenForProduct();   // init: geen product -> enkel placeholder
         applyProductMode();       // init: lagen-modus (geen afwerkingsproduct)
         mengBuild();              // init: meng-hulp cellen (leeg tot product gekozen)
+
+        // V4.3.1: "1 set" / "1 zak" i.p.v. "1 sets"; Oekraiens 2-4 = aparte vorm
+        function verpakWoord(n, set) {
+            if (n === 1) return set ? T.setSingular : T.bagSingular;
+            var m10 = n % 10, m100 = n % 100;
+            if (m10 >= 2 && m10 <= 4 && !(m100 >= 12 && m100 <= 14)) return set ? T.setsFew : T.bagsFew;
+            return set ? T.setsWord : T.bagsWord;
+        }
 
         function nf(x, d) {
             return x.toLocaleString(T.locale, { minimumFractionDigits: d, maximumFractionDigits: d });
@@ -855,7 +873,8 @@
                 document.getElementById('totaalRow').innerHTML = '';
                 noteEl.innerHTML = p.dichting ? T.m30dNote : T.m30Note;
                 noteEl.style.display = 'block';
-                ta.innerHTML = T.takeWord + T.colon + ' <b>' + Math.ceil(m30kg / p.verpakKg - 1e-9) + ' ' + T.bagsWord + '</b>';
+                var m30zak = Math.ceil(m30kg / p.verpakKg - 1e-9);
+                ta.innerHTML = T.takeWord + T.colon + ' <b>' + m30zak + ' ' + verpakWoord(m30zak, false) + '</b>';
                 ta.style.display = 'block';
                 emptyEl.style.display = 'none';
                 tableEl.style.display = 'table';
@@ -875,7 +894,9 @@
                     '<th></th><th>' + p.naam + '</th><th>' + T.colWater + '</th>';
             }
 
-            var matPerLaag = oppervlakte * p.perLaag;   // mengklaar kg per laag
+            // V4.3.1: ruwe/oneffen ondergrond = diktetoeslag min. 25 % (TDS AQUAFIN-2K, DIN 18531/18534/18535)
+            var ruw = document.getElementById('ruwOndergrond').checked ? 1.25 : 1;
+            var matPerLaag = oppervlakte * p.perLaag * ruw;   // mengklaar kg per laag
             var totaalMat = matPerLaag * aantalLagen;   // mengklaar kg totaal
 
             var body = document.getElementById('lagenBody');
@@ -904,7 +925,7 @@
             // mee te nemen: hele verpakkingen naar boven afgerond (1K = zakken, 2K/RB400 = sets)
             var packKg = p.tweeComp ? p.setKg : p.verpakKg;
             var cnt = Math.ceil(totaalMat / packKg - 1e-9);
-            var woord = p.tweeComp ? T.setsWord : T.bagsWord;
+            var woord = verpakWoord(cnt, p.tweeComp);
             var ta = document.getElementById('takeAlong');
             ta.innerHTML = T.takeWord + T.colon + ' <b>' + cnt + ' ' + woord + '</b>';
             ta.style.display = 'block';
